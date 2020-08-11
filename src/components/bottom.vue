@@ -6,7 +6,7 @@
         <img src="../../static/tel.png" />
         <p class="color">{{info.telephone}}</p>
       </div>
-      <p class="importInfo">Copyright 版权所有 © 某某化妆品 www.xxxx.com 某某化妆品有限公司    沪ICP备xxxxxx号-x</p>
+      <p class="importInfo">{{info.copyright}}</p>
     </div>
   </div>
 </template>

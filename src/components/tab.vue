@@ -9,7 +9,7 @@
           <div class="shopcartView d-flex d-flex-middle" v-if="type!=2">
             <div class="numView relative">
               <img src="../../static/shopcart.png" />
-              <p class="color">5</p>
+              <p class="color">{{cartnum}}</p>
             </div>
             <p class="go click" @click="goShopCart">去购物车结算</p>
           </div>
@@ -23,17 +23,16 @@ export default {
     type: {
       default: 0
     },
-    /*searchValue:{
-      default:''
-    }*/
   },
   data () {
     return{
-      searchValue:''
+      searchValue:'',
+      cartnum:0,
+      api_token: this.$cookies.get('api_token')?this.$cookies.get('api_token'):'',
     }
   },
   mounted() {
-
+    this.getCart();
   },
   methods:{
     search:function(){
@@ -49,6 +48,12 @@ export default {
     },
     goShopCart:function(){
       this.$emit('shopCart')
+    },
+    getCart(){
+      this.axios.get('/api/cart?api_token='+this.api_token).then(res=>{
+        this.$cookies.set('mycar',res.data.data.cart);
+        this.cartnum = res.data.data.cart.length;
+      });
     }
   }
 }

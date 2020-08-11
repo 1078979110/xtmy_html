@@ -39,9 +39,11 @@
       },
       showFn:function(){
         this.show = !this.show
+        this.showHl = false;
       },
       selecth:function(){
-          this.showHl = !this.show;
+          this.showHl = !this.showHl;
+          this.show = false;
           this.axios.get('/api/hospital?api_token='+ this.api_token).then(res=>{
             if(res.data.status == 200)
             this.hospitallist = res.data.data.hospital
@@ -103,7 +105,8 @@
   color:#333333;
   margin-left: 0 important;
   text-align: center;
-  line-height: 30px
+  line-height: 30px;
+  cursor: pointer;
 }
 .ml0{
   margin-left: 0 !important;

@@ -1,6 +1,6 @@
 <template>
   <div id="order">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type='2' @search="search"></tab>
     </div>
@@ -14,29 +14,19 @@
           <p class="w300">交易时间</p>
           <p class="w60 taR">状态</p>
         </div>
-        <div class="d-flex d-flex-middle d-flex-between li" v-for="(item,index) in [0,0,0,0]" :key="index">
-          <p class="w200 taL">11158649941</p>
+        <div class="d-flex d-flex-middle d-flex-between li" v-for="item in orderlist" >
+          <p class="w200 taL">{{item.orderid}}</p>
           <div class="w300">
-            <p class="taL">
-              <span>3M</span>
-              <span>水胶体敷料</span>
-              <span>90022T</span>
-            </p>
-            <p class="taL">
-              <span>3M</span>
-              <span>水胶体敷料</span>
-              <span>90022T</span>
-            </p>
-            <p class="taL">
-              <span>3M</span>
-              <span>水胶体敷料</span>
-              <span>90022T</span>
+            <p class="taL" v-for="arr in item.orderinfo" >
+              <span>{{arr.medicinal}}</span>
+              <span>{{arr.medicinalnum}}</span>
+              <span>{{arr.specification}}</span>
             </p>
           </div>
-          <p class="w150 price">￥150.00</p>
-          <p class="w150">3件</p>
-          <p class="w300">2020-07-13  16:14:32</p>
-          <p class="w60">成功</p>
+          <p class="w150 price">￥{{item.totalprice}}</p>
+          <p class="w150">{{item.totalnum}}件</p>
+          <p class="w300">{{item.created_at}}</p>
+          <p class="w60">{{item.orderstatus}}</p>
         </div>
       </div>
     </div>
@@ -50,13 +40,18 @@
 <script>
   import tab from '../../components/tab.vue'
   export default{
+    name:'order',
     components:{
       tab
     },
     data(){
       return{
-
+        userinfo:this.$cookies.get('userinfo'),
+        orderlist:[]
       }
+    },
+    mounted(){
+      this.orders();
     },
     methods:{
       search:function(value){
@@ -67,6 +62,18 @@
           this.$router.push({path:'/'+url})
         }
       },
+      orders:function(){
+        this.axios.get('/api/order?api_token='+this.userinfo.api_token).then(res=>{
+          this.orderlist = res.data.data.order;
+          for(var i in this.orderlist){
+            this.orderlist[i]['orderinfo'] = JSON.parse(this.orderlist[i]['orderinfo']);
+            for(var j in this.orderlist[i]['orderinfo']){
+              var len = this.orderlist[i]['orderinfo'].length;
+              this.orderlist[i].totalnum = len;
+            }
+          }
+        });
+      }
     }
   }
 </script>

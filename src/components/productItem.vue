@@ -17,7 +17,7 @@
     name:"productItem",
     props:{
       type:{default:1},
-      productItem:{newname:{default:''}, specification:{default:''}, price:{default:'0'}, stocks:{default:'库存0'}},
+      productItem:['newname','specification','price','stocks'],
     },
     data(){
       return{

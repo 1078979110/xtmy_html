@@ -1,6 +1,6 @@
 <template>
   <div id="shopCart">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type="2" @search="search"></tab>
     </div>
@@ -81,7 +81,8 @@
           {id:4,name:'3M 水胶体敷料  90022T',price:1049,unit:'片',num:1}
         ],
         checkList:[],
-        alertShow: false
+        alertShow: false,
+        userinfo:this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):[],
       }
     },
     methods:{
@@ -174,6 +175,11 @@
       },
       go:function(url){
         this.$router.push({path:'/'+url})
+      },
+      myCart:function(){
+        this.axios.get('/api/cart?api_token='+this.userinfo['api_token']).then(res=>{
+          this.list = res.data.data.cart
+        });
       }
     }
   }

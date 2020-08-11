@@ -7,7 +7,7 @@
     <!-- 商品列表 -->
     <div class="productList content d-flex d-flex-middle d-flex-wrap">
       <div class="productLi" id="productLi" v-bind="list" v-show="list.length>0" v-for="(item,indexP) in list" :key="indexP">
-        <product-item  @add="add"></product-item>
+        <product-item :item="item"  @add="add"></product-item>
       </div>
     </div>
     <div class="none" v-show="list.length==0">
@@ -66,7 +66,7 @@
           url = url + '?q='+this.value
         }
         this.axios.get(url).then(res=>{
-          this.list = res.data.data.list
+          this.list = res.data.data.list.data
         });
       },
       shopCart:function(data){
