@@ -1,0 +1,140 @@
+<template>
+  <div id="classify">
+    <top @go="go"></top>
+    <div class="tab">
+      <tab @search="search" @shopCart="shopCart"></tab>
+    </div>
+    <!-- 筛选 -->
+    <div class="filterView">
+      <div class="content bgF d-flex d-flex-middle" v-for="(item,index) in tabs" :key="index">
+        <p class="click" v-for="(item_,index_) in item.list" :key="index_" :class="{'color':index_==item.activeIndex}" @click="choose(index,index_)">{{item_}}</p>
+      </div>
+    </div>
+    <!-- 商品列表 -->
+    <div class="productList content d-flex d-flex-middle d-flex-wrap">
+      <div class="productLi" v-for="(item,indexP) in [0,0,0,0,0,0,0]" :key="indexP">
+        <product-item @add="add"></product-item>
+      </div>
+    </div>
+    <!-- 分页 -->
+    <div class="pagination">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="100">
+      </el-pagination>
+    </div>
+    <!-- bottom -->
+    <bottom></bottom>
+    <!--  -->
+    <div class="addShopCartAlert" v-if="alert">
+      <addShopCart @hideFn="alertHide" @addFn="addFn"></addShopCart>
+    </div>
+  </div>
+</template>
+
+<script>
+  import tab from '../../components/tab.vue'
+  import productItem from '../../components/productItem.vue'
+  import addShopCart from '../../components/addShopCart.vue'
+  export default{
+    components:{
+      tab,
+      productItem,
+      addShopCart
+    },
+    data(){
+      return{
+        tabs:[
+          {
+            name:'厂家',
+            activeIndex: 0,
+            list:['全部厂家','贝朗','3M','纽迪希亚']
+          },
+          {
+            name:'产品线',
+            activeIndex: 0,
+            list:['全部产品线','SIVT','二级市场']
+          },
+          {
+            name:'分类',
+            activeIndex: 0,
+            list:['全部分类','安全留置针','接头','泵用耗材']
+          }
+        ],
+        alert:false
+      }
+    },
+    methods:{
+      choose:function(index,index_){
+        this.tabs[index].activeIndex = index_
+      },
+      search:function(value){
+        this.$router.push({name:'search',params:{value:value}})
+      },
+      add:function(data){ //弹窗显示
+        this.alert = true
+      },
+      alertHide:function(data){
+        this.alert = false
+      },
+      addFn:function(data){ //加入购物车
+        this.alert = false
+      },
+      shopCart:function(data){
+        this.$router.push({path:'/shopCart'})
+      },
+      go:function(url){
+        this.$router.push({path:'/'+url})
+      }
+    }
+  }
+</script>
+
+<style lang="scss">
+  $color:#109E89;
+  #classify{
+    background-color: #F5F7FA;
+    overflow: hidden;
+    .tab{
+      margin: 48px 0 46px 0;
+    }
+    .filterView{
+      .content{
+        box-sizing: border-box;
+        padding: 10px 30px;
+        p{
+          margin-right: 50px;
+        }
+        p:nth-of-type(1){
+          width: 100px;
+          height: 30px;
+          line-height: 30px;
+          margin-right: 30px;
+        }
+      }
+    }
+    .productList{
+      padding-bottom: 45px;
+      .productLi{
+        margin: 30px 26px 0 0;
+      }
+      div:nth-of-type(4n){
+        margin-right: 0;
+      }
+    }
+    .pagination{
+      margin-bottom: 58px;
+      text-align: center;
+    }
+  }
+  .el-pager .active{
+    background-color: $color !important;
+  }
+  .el-pagination.is-background .el-pager li:not(.disabled):hover{
+    color: $color !important;
+  }
+  .el-pagination.is-background .btn-next, .el-pagination.is-background .btn-prev, .el-pagination.is-background .el-pager li{
+    background-color: #fff;
+  }
+</style>
