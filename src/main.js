@@ -16,6 +16,7 @@ Vue.prototype.$axios= axios
 Vue.prototype.userinfo = [];
 Vue.prototype.type = 1;
 Vue.prototype._token = '',
+Vue.prototype.hid = 0;
 Vue.config.productionTip = false
 Vue.$cookies.config();
 Vue.use(ElementUI);

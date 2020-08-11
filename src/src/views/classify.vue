@@ -1,7 +1,7 @@
 <template>
   <div id="classify">
     <top @go="go"></top>
-    <div class="tab">
+    <div class="tab bgF">
       <tab @search="search" @shopCart="shopCart"></tab>
     </div>
     <!-- 筛选 -->
@@ -38,6 +38,7 @@
   import productItem from '../../components/productItem.vue'
   import addShopCart from '../../components/addShopCart.vue'
   export default{
+    name:'classify',
     components:{
       tab,
       productItem,
@@ -45,6 +46,7 @@
     },
     data(){
       return{
+        userinfo:this.$cookies.get('userinfo'),
         tabs:[
           {
             name:'厂家',
@@ -53,19 +55,31 @@
           },
           {
             name:'产品线',
-            activeIndex: 0,
+            activeIndex: 1,
             list:['全部产品线','SIVT','二级市场']
           },
           {
             name:'分类',
-            activeIndex: 0,
+            activeIndex: 2,
             list:['全部分类','安全留置针','接头','泵用耗材']
           }
         ],
         alert:false
       }
     },
+    mounted:function(){
+      this.filter();
+      
+    },
     methods:{
+      filter:function(){
+        this.axios.get('/api/filter').then(res=>{
+          for(var i in res.data.data ){
+            this.tabs[i].list = res.data.data[i]
+          }
+          console.log(this.tabs);
+        });
+      },
       choose:function(index,index_){
         this.tabs[index].activeIndex = index_
       },
@@ -97,14 +111,15 @@
     background-color: #F5F7FA;
     overflow: hidden;
     .tab{
-      margin: 48px 0 46px 0;
+      box-sizing:border-content;
+      padding:48px 0 46px 0;
     }
     .filterView{
       .content{
         box-sizing: border-box;
         padding: 10px 30px;
         p{
-          margin-right: 50px;
+          margin-right: 10px;
         }
         p:nth-of-type(1){
           width: 100px;

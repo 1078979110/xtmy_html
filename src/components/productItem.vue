@@ -1,11 +1,11 @@
 <template>
   <div class="productItem d-flex d-flex-between d-flex-bottom">
     <div class="productView">
-      <p class="name">3M 皮肤伤口胶带</p>
-      <p class="name">R1547</p>
+      <p class="name">{{productItem.newname}}</p>
+      <p class="name">{{productItem.specification}}</p>
       <div class="d-flex d-flex-middle">
-        <p class="price"><small>￥</small>1049/盒</p>
-        <p class="stock">库存100</p>
+        <p class="price" v-show="type !=1"><small>￥</small>{{productItem.price}}</p>
+        <p class="stock">{{productItem.stocks}}</p>
       </div>
     </div>
     <img src="../../static/shopcart2.png" class="addShopcart click" @click="submit"/>
@@ -14,6 +14,11 @@
 
 <script>
   export default{
+    name:"productItem",
+    props:{
+      type:{default:1},
+      productItem:{newname:{default:''}, specification:{default:''}, price:{default:'0'}, stocks:{default:'库存0'}},
+    },
     data(){
       return{
 

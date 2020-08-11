@@ -1,13 +1,13 @@
 <template>
   <div id="classify">
-    <top @go="go"></top>
-    <div class="tab">
+    <top @go="go" v-bind="userinfo"></top>
+    <div class="tab bgF">
       <tab :searchValue='value' @search="search" @shopCart="shopCart"></tab>
     </div>
     <!-- 商品列表 -->
     <div class="productList content d-flex d-flex-middle d-flex-wrap">
-      <div class="productLi" v-for="(item,indexP) in list" :key="indexP">
-        <product-item @add="add"></product-item>
+      <div class="productLi" id="productLi" v-bind="list" v-show="list.length>0" v-for="(item,indexP) in list" :key="indexP">
+        <product-item  @add="add"></product-item>
       </div>
     </div>
     <div class="none" v-show="list.length==0">
@@ -36,6 +36,7 @@
   import productItem from '../../components/productItem.vue'
   import addShopCart from '../../components/addShopCart.vue'
   export default{
+    name:'search',
     components:{
       tab,
       productItem,
@@ -44,13 +45,15 @@
     data(){
       return{
         value:'',
-        list:[0,0,0,0,0,0,0],
-        alert:false
+        list:[],
+        alert:false,
+        userinfo:this.$cookies.get('userinfo'),
+        type: this.$cookies.get('type'),
       }
     },
     mounted() {
       this.value = this.$route.params.value
-      console.log(this.$route.params.value)
+      this.getList();
     },
     methods:{
       search:function(value){
@@ -58,7 +61,13 @@
         this.getList()
       },
       getList:function(){
-        console.log(111)
+        var url = '/api/index';
+        if(this.value != ''){
+          url = url + '?q='+this.value
+        }
+        this.axios.get(url).then(res=>{
+          this.list = res.data.data.list
+        });
       },
       shopCart:function(data){
         this.$router.push({path:'/shopCart'})
@@ -85,6 +94,7 @@
     background-color: #F5F7FA;
     overflow: hidden;
     .tab{
+      box-sizing:border-content;
       margin: 48px 0 46px 0;
     }
     .productList{

@@ -1,6 +1,6 @@
 <template>
   <div id="login">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type='2' @search="search"></tab>
     </div>
@@ -36,13 +36,15 @@
 <script>
   import tab from '../../components/tab.vue'
   export default{
+    name: 'login',
     components:{
       tab
     },
     data(){
       return{
         telephone:'',
-        password:''
+        password:'',
+        userinfo:this.$cookies.get('userinfo')
       }
     },
     methods:{
@@ -60,10 +62,12 @@
       auth:function(){
         this.axios.post('/api/login',{telephone:this.telephone, password:this.password}).then(res=>{
           if(res.data.status == 200){
-            this.$cookies.set('_token',res.data.user.api_token);
-            this.$cookies.set('type',res.data.user.type);
-            this.$cookies.set('userinfo',res.data.user);
-            this.type = res.data.user.type;
+            this.$cookies.set('api_token',res.data.data.user.api_token);
+            this.$cookies.set('type',res.data.data.user.type);
+            this.$cookies.set('userinfo',res.data.data.user);
+            this.type = res.data.data.user.type;
+            this.userinfo = this.$cookies.get('userinfo');
+            this.api_token = this.$cookies.get('api_token');
             if(this.type == 2){
               alert('请在右上角进行选择医院');
             }

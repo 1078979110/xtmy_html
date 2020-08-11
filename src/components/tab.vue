@@ -23,13 +23,13 @@ export default {
     type: {
       default: 0
     },
-    searchValue:{
+    /*searchValue:{
       default:''
-    }
+    }*/
   },
   data () {
     return{
-      value:''
+      searchValue:''
     }
   },
   mounted() {
