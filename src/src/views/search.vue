@@ -7,7 +7,7 @@
     <!-- 商品列表 -->
     <div class="productList content d-flex d-flex-middle d-flex-wrap">
       <div class="productLi" id="productLi" v-bind="list" v-show="list.length>0" v-for="(item,indexP) in list" :key="indexP">
-        <product-item :item="item"  @add="add"></product-item>
+        <product-item v-bind:item="item"  @add="add"></product-item>
       </div>
     </div>
     <div class="none" v-show="list.length==0">
@@ -52,7 +52,7 @@
       }
     },
     mounted() {
-      this.value = this.$route.params.value
+      this.value = this.$route.params.value,
       this.getList();
     },
     methods:{
@@ -62,9 +62,10 @@
       },
       getList:function(){
         var url = '/api/index';
-        if(this.value != ''){
+        if(this.value != '' && this.vue != undefined){
           url = url + '?q='+this.value
         }
+        console.log(this.value);
         this.axios.get(url).then(res=>{
           this.list = res.data.data.list.data
         });

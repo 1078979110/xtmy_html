@@ -13,7 +13,7 @@
         </div>
         <div class="info" v-if="api_token && show">
           <p @click="go('password')">修改密码</p>
-          <p>退出登录</p>
+          <p @click="logout">退出登录</p>
         </div>
       </div>
     </div>
@@ -28,7 +28,7 @@
       return{
         hospitallist:[0,0,0],
         hid:this.$cookies.get('hid')?this.$cookies.get('hid'):0,
-        hospital:this.$cookies.get('hospital')?this.$cookies.get('hospital'):0,
+        hospital:this.$cookies.get('hospital')?this.$cookies.get('hospital'):'',
         show: false,
         showHl:false
       }
@@ -61,6 +61,18 @@
             this.showHl = !this.showHl
             alert(res.data.msg)
           }
+        });
+      },
+      logout:function(){
+        this.axios.get('/api/logout?api_token='+this.api_token).then(res=>{
+          alert(res.data.msg);
+          this.$cookies.remove('mycar');
+          this.$cookies.remove('hid');
+          this.$cookies.remove('hospital');
+          this.$cookies.remove('api_token');
+          this.$cookies.remove('userinfo');
+          this.$cookies.remove('type');
+          this.$router.push({path:'/login'});
         });
       }
     }

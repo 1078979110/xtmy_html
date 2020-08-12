@@ -1,6 +1,6 @@
 <template>
   <div id="login">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type='2' @search="search"></tab>
     </div>
@@ -15,21 +15,21 @@
           <div class="title d-flex d-flex-middle d-flex-between">
             <p class="titleL">原密码</p>
           </div>
-          <input type="password" />
+          <input type="password" name="password" v-model="password" />
         </div>
         <div class="viewLi">
           <div class="title d-flex d-flex-middle d-flex-between">
             <p class="titleL">新密码</p>
           </div>
-          <input type="password" />
+          <input type="password" name="newpassword" v-model.lazy="newpassword" />
         </div>
         <div class="viewLi">
           <div class="title d-flex d-flex-middle d-flex-between">
             <p class="titleL">再次确认密码</p>
           </div>
-          <input type="password" />
+          <input type="password" name="comfirmpassword" v-model.lazy="comfirmpassword" />
         </div>
-        <p class="submit" @click="go('')">去登录</p>
+        <p class="submit" @click="changepwd">确定</p>
       </div>
     </div>
     <div class="bottom">
@@ -41,12 +41,24 @@
 <script>
   import tab from '../../components/tab.vue'
   export default{
+    name:'password',
     components:{
       tab
     },
     data(){
       return{
-
+        userinfo:this.$cookies.get('userinfo'),
+        password:'',
+        newpassword:'',
+        comfirmpassword:''
+      }
+    },
+    computed:{
+      passwordCheckValidate: function(){
+        if(this.comfirmpassword !== this.newpassword){
+          alert('确认密码和新密码不一致！');
+          return false;
+        }
       }
     },
     methods:{
@@ -54,10 +66,17 @@
         this.$router.push({name:'search',params:{value:value}})
       },
       go:function(url){
-        if(url!='order'){
-          this.$router.push({path:'/'+url})
-        }
+        this.$router.push({path:'/'+url})
       },
+      changepwd: function(){
+        this.passwordCheckValidate;
+        this.axios.post('/api/changepwd?api_token='+this.userinfo['api_token'],{password:this.password,newpassword:this.newpassword}).then(res=>{
+          alert(res.data.msg);
+          if(res.data.status ==200){
+            this.$cookies.set('userinfo', res.data.data.user);
+          }
+        });
+      }
     }
   }
 </script>

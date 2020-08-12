@@ -1,6 +1,6 @@
 <template>
   <div id="home">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type="1" @shopCart="shopCart"></tab>
     </div>
@@ -45,7 +45,8 @@
     },
     data () {
       return{
-        searchVal:''
+        searchVal:'',
+        userinfo: this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):[],
       }
     },
     methods:{

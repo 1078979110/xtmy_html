@@ -1,11 +1,11 @@
 <template>
-  <div class="productItem d-flex d-flex-between d-flex-bottom">
+  <div class="productItem d-flex d-flex-between d-flex-bottom" >
     <div class="productView">
-      <p class="name">{{productItem.newname}}</p>
-      <p class="name">{{productItem.specification}}</p>
+      <p class="name">{{item.medicinal}}</p>
+      <p class="name">{{item.specification}}</p>
       <div class="d-flex d-flex-middle">
-        <p class="price" v-show="type !=1"><small>￥</small>{{productItem.price}}</p>
-        <p class="stock">{{productItem.stocks}}</p>
+        <p class="price" v-show="type !=1"><small>￥</small>{{item.price}}</p>
+        <p class="stock">{{item.stocks}}</p>
       </div>
     </div>
     <img src="../../static/shopcart2.png" class="addShopcart click" @click="submit"/>
@@ -15,13 +15,10 @@
 <script>
   export default{
     name:"productItem",
-    props:{
-      type:{default:1},
-      productItem:['newname','specification','price','stocks'],
-    },
+    props:['item'],
     data(){
       return{
-
+        type:this.$cookies.get('type'),
       }
     },
     methods:{

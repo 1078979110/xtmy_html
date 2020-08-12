@@ -47,7 +47,16 @@
         userinfo:this.$cookies.get('userinfo')
       }
     },
+    mounted(){
+      this.chechAuth();
+    },
     methods:{
+      chechAuth:function(){
+        if(this.userinfo){
+          alert('已经登陆，请不要重复登陆');
+          this.$router.push({path:'/home'});
+        }
+      },
       search:function(value){
         this.$router.push({name:'search',params:{value:value}})
       },

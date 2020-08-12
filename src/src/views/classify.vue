@@ -12,8 +12,8 @@
     </div>
     <!-- 商品列表 -->
     <div class="productList content d-flex d-flex-middle d-flex-wrap">
-      <div class="productLi" v-for="(item,indexP) in [0,0,0,0,0,0,0]" :key="indexP">
-        <product-item @add="add"></product-item>
+      <div class="productLi" v-for="item in list">
+        <product-item @add="add" v-bind:item="item"></product-item>
       </div>
     </div>
     <!-- 分页 -->
@@ -46,7 +46,11 @@
     },
     data(){
       return{
+        pid:'',
+        lid:'',
+        cid:'',
         userinfo:this.$cookies.get('userinfo'),
+        list:[],
         tabs:[
           {
             name:'厂家',
@@ -55,12 +59,12 @@
           },
           {
             name:'产品线',
-            activeIndex: 1,
+            activeIndex: 0,
             list:['全部产品线','SIVT','二级市场']
           },
           {
             name:'分类',
-            activeIndex: 2,
+            activeIndex: 0,
             list:['全部分类','安全留置针','接头','泵用耗材']
           }
         ],
@@ -69,7 +73,8 @@
     },
     mounted:function(){
       this.filter();
-      
+      var url = '/api/index';
+      this.getList(url);
     },
     methods:{
       filter:function(){
@@ -77,14 +82,28 @@
           for(var i in res.data.data ){
             this.tabs[i].list = res.data.data[i]
           }
-          console.log(this.tabs);
         });
       },
       choose:function(index,index_){
-        this.tabs[index].activeIndex = index_
+        
+        if(index==0){
+          this.pid = this.tabs[index].list[index_];
+        }else if(index==1){
+          this.lid = this.tabs[index].list[index_];
+        }else{
+          this.cid = this.tabs[index].list[index_];
+        }
+        this.tabs[index].activeIndex = index_;
+        var url = '/api/index?pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid;
+        this.getList(url);
+      },
+      getList:function(url){
+        this.axios.get(url).then(res=>{
+          this.list = res.data.data.list.data
+        });
       },
       search:function(value){
-        this.$router.push({name:'search',params:{value:value}})
+        this.$router.push({name:'search',params:{value:value,pid:this.pid,lid:this.lid,cid:this.cid}})
       },
       add:function(data){ //弹窗显示
         this.alert = true
