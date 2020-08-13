@@ -1,6 +1,6 @@
 <template>
   <div id="classify">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab bgF">
       <tab @search="search" @shopCart="shopCart"></tab>
     </div>
@@ -73,8 +73,15 @@
     },
     mounted:function(){
       this.filter();
-      var url = '/api/index';
-      this.getList(url);
+      this.pid = this.$route.params.pid?this.$route.params.pid:'';
+      this.lid = this.$route.params.lid?this.$route.params.lid:'';
+      console.log(this.pid);
+      console.log(this.lid);
+      var index0 = this.tabs[0].list.indexOf(this.pid);
+      this.tabs[0].activeIndex = index0;
+      var index1 = this.tabs[1].list.indexOf(this.lid);
+      this.tabs[1].activeIndex = index1;
+      this.getList(this.pid,this.lid,this.cid);
     },
     methods:{
       filter:function(){
@@ -85,7 +92,6 @@
         });
       },
       choose:function(index,index_){
-        
         if(index==0){
           this.pid = this.tabs[index].list[index_];
         }else if(index==1){
@@ -94,10 +100,12 @@
           this.cid = this.tabs[index].list[index_];
         }
         this.tabs[index].activeIndex = index_;
-        var url = '/api/index?pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid;
-        this.getList(url);
+        
+        this.getList(this.pid,this.lid,this.cid);
       },
-      getList:function(url){
+      getList:function(pid,lid,cid){
+        var url = '/api/index';
+        url = url+'?pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid;
         this.axios.get(url).then(res=>{
           this.list = res.data.data.list.data
         });

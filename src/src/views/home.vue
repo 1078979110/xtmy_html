@@ -23,11 +23,11 @@
     <!--  -->
     <div class="products">
       <div class="content d-flex d-flex-middle d-flex-between">
-        <div class="productItem click" v-for="(item,index) in [0,0,0]" :key="index">
+        <div class="productItem click" v-for="(item,index) in list" :key="index" @click="classify(index)">
           <img src="../../../static/banner.png" />
-          <div class="productInfo" @click="classify">
-            <p>SIVT</p>
-            <p>二级市场</p>
+          <div class="productInfo" >
+            <p>{{item.name}}</p>
+            <p>{{item.line}}</p>
           </div>
         </div>
       </div>
@@ -47,11 +47,28 @@
       return{
         searchVal:'',
         userinfo: this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):[],
+        list:[],
+        pid:'',
+        lid:'',
+        cid:'',
       }
     },
+    mounted(){
+      this.pfilter();
+    },
     methods:{
-      classify:function(){
-        this.$router.push({path:'/classify'})
+      classify:function(index){
+        this.pid = this.list[index].name;
+        this.lid = this.list[index].line;
+        console.log(this.pid);
+        console.log(this.lid);
+        console.log(index);
+        this.$router.push({path:'/classify',params:{'hid':this.pid,'lid':this.lid}});
+      },
+      pfilter:function(){
+        this.axios.get('/api/homefilter').then(res=>{
+          this.list = res.data.data.filter
+        });
       },
       search:function(){
         var that = this

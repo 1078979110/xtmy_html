@@ -32,7 +32,7 @@ export default {
     }
   },
   mounted() {
-    this.getCart();
+    this.getCart()
   },
   methods:{
     search:function(){
@@ -50,10 +50,12 @@ export default {
       this.$emit('shopCart')
     },
     getCart(){
-      this.axios.get('/api/cart?api_token='+this.api_token).then(res=>{
-        this.$cookies.set('mycar',res.data.data.cart);
-        this.cartnum = res.data.data.cart.length;
-      });
+      if(this.api_token !=''){
+        this.axios.get('/api/cart?api_token='+this.api_token).then(res=>{
+          this.$cookies.set('mycar',res.data.data.cart);
+          this.cartnum = res.data.data.cart.length;
+        });
+      }
     }
   }
 }

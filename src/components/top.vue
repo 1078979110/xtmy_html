@@ -33,6 +33,13 @@
         showHl:false
       }
     },
+    mounted(){
+      var route_ = ['order','shopCart','password','placeOrder'];
+      if((route_.indexOf(this.$route.name)>=0)&&( !this.$cookies.isKey('api_token'))){
+        this.$router.push({'name':'login'});
+        alert('还未登陆，请先登录！');
+      }
+    },
     methods:{
       go:function(url){
         this.$emit('go',url)
@@ -58,6 +65,7 @@
             this.hid = id;
             this.$cookies.set('hid',id);
             this.$cookies.set('hospital',this.hospitallist[id]);
+            this.hospital = this.hospitallist[id]
             this.showHl = !this.showHl
             alert(res.data.msg)
           }
@@ -75,6 +83,9 @@
           this.$router.push({path:'/login'});
         });
       }
+    },
+    checkLogin:function(){
+      
     }
   }
 </script>

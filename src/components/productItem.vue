@@ -8,7 +8,7 @@
         <p class="stock">{{item.stocks}}</p>
       </div>
     </div>
-    <img src="../../static/shopcart2.png" class="addShopcart click" @click="submit"/>
+    <img src="../../static/shopcart2.png" class="addShopcart click" @click="submit(item.id)"/>
   </div>
 </template>
 
@@ -22,8 +22,8 @@
       }
     },
     methods:{
-      submit:function(){
-        this.$emit('add')
+      submit:function(id){
+        this.$emit('add(id)')
       },
     }
   }
