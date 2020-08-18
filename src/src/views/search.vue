@@ -1,8 +1,8 @@
 <template>
-  <div id="classify">
+  <div id="classify" v-loading="loading">
     <top @go="go" v-bind="userinfo"></top>
-    <div class="tab bgF">
-      <tab :searchValue='value' @search="search" @shopCart="shopCart"></tab>
+    <div class="tab" v-if="value">
+      <tab :value_search='value' @search="search" @shopCart="shopCart"></tab>
     </div>
     <!-- 商品列表 -->
     <div class="productList content d-flex d-flex-middle d-flex-wrap">
@@ -19,7 +19,10 @@
       <el-pagination
         background
         layout="prev, pager, next"
-        :total="100">
+        :page-size="20"
+        :current-page="page"
+        :total="total"
+        @current-change="changePage">
       </el-pagination>
     </div>
     <!-- bottom -->
@@ -44,31 +47,60 @@
     },
     data(){
       return{
-        value:'',
+        value:null,
         list:[],
         alert:false,
         userinfo:this.$cookies.get('userinfo'),
         type: this.$cookies.get('type'),
+        loading: null,
+        api_token: this.$cookies.get('api_token')?this.$cookies.get('api_token'):'',
+        page:1,
+        total: 0
       }
     },
     mounted() {
-      this.value = this.$route.params.value,
-      this.getList();
+      this.value = this.$route.query.value
+      this.getList()
+    },
+    watch:{
+      value(newV,oldV){
+        this.value = newV
+      }
     },
     methods:{
       search:function(value){
         this.value = value
         this.getList()
       },
+      changePage(e){
+        this.page = e
+        this.getList()
+      },
       getList:function(){
-        var url = '/api/index';
-        if(this.value != '' && this.vue != undefined){
-          url = url + '?q='+this.value
+        
+        if(this.api_token!=''){
+          if(this.$cookies.get('userinfo').type == 2){
+            if(this.$cookies.get('hid')){
+              var url = '/api/index?api_token='+this.api_token+'&q='+this.value +'&hid='+this.$cookies.get('hid')+'&page='+this.page;
+            }else{
+              this.$message({
+                type:'warning',
+                message:'请在右上角进行选择医院'
+              });
+              return
+            }
+          }else{
+            var url = '/api/index?api_token='+this.api_token+'&q='+this.value+'&page='+this.page;
+          }
+          this.loading = true
+          this.axios.get(url).then(res=>{
+            this.list = res.data.data.list.data
+            this.total = res.data.data.list.total
+            this.loading = false
+            console.log(res)
+          });
         }
-        console.log(this.value);
-        this.axios.get(url).then(res=>{
-          this.list = res.data.data.list.data
-        });
+
       },
       shopCart:function(data){
         this.$router.push({path:'/shopCart'})
@@ -95,8 +127,8 @@
     background-color: #F5F7FA;
     overflow: hidden;
     .tab{
-      box-sizing:border-content;
-      margin: 48px 0 46px 0;
+      box-sizing: border-box;
+      padding: 48px 0 46px 0;
     }
     .productList{
       padding-bottom: 45px;
@@ -121,16 +153,5 @@
   .el-pagination.is-background .btn-next, .el-pagination.is-background .btn-prev, .el-pagination.is-background .el-pager li{
     background-color: #fff;
   }
-  .none{
-    text-align: center;
-    padding-bottom: 220px;
-    img{
-      width: 330px;
-      height: 300px;
-    }
-    p{
-      font-size:18px;
-      color: #999;
-    }
-  }
+
 </style>

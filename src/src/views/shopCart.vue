@@ -1,5 +1,5 @@
 <template>
-  <div id="shopCart">
+  <div id="shopCart" v-loading="loading">
     <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type="2" @search="search"></tab>
@@ -13,9 +13,9 @@
           <p>全选</p>
         </div>
         <div class="FV_right d-flex d-flex-middle d-flex-end">
-          <p class="numView">已选2件商品</p>
+          <p class="numView">已选{{checkList.length}}件商品</p>
           <p class="total">￥{{total.toFixed(2)}}</p>
-          <p class="submit mt0" @click="alertShowFn">下单</p>
+          <p class="submit mt0" @click="buy">下单</p>
         </div>
       </div>
       <!--  -->
@@ -30,11 +30,17 @@
             <p class="price">￥{{item.price}}/{{item.unit}}</p>
           </div>
           <div class="numBtns">
-             <el-input-number v-model="item.num" :min="1" @change="handleChange"></el-input-number>
+             <el-input-number v-model="item.num" :min="1" @change="handleChange(item.id,item.num)"></el-input-number>
           </div>
           <div class="totalLi">￥{{item.price*item.num}}</div>
-          <div class="del click" @click="del(item.id)">删除</div>
+          <div class="del click" @click="delFn(item.id)">删除</div>
         </div>
+        <!--  -->
+        <div class="none" v-show="list.length==0">
+          <img src="../../../static/none.png" />
+          <p>暂无订单哦，快去下单吧~</p>
+        </div>
+        <!--  -->
       </div>
       <!--  -->
       <div class="functionView fV_view_bottom d-flex d-flex-middle d-flex-between">
@@ -47,9 +53,9 @@
           <p class="del click" @click="delAll">删除</p>
         </div>
         <div class="FV_right d-flex d-flex-middle d-flex-end">
-          <p class="numView">已选2件商品</p>
+          <p class="numView">已选{{checkList.length}}件商品</p>
           <p class="total">￥{{total.toFixed(2)}}</p>
-          <p class="submit mt0" @click="alertShowFn">下单</p>
+          <p class="submit mt0" @click="buy">下单</p>
         </div>
       </div>
     </div>
@@ -74,28 +80,54 @@
     data(){
       return{
         total:0,
-        list:[
-          {id:1,name:'3M 水胶体敷料  90022T',price:1049,unit:'片',num:1},
-          {id:2,name:'3M 水胶体敷料  90022T',price:1049,unit:'片',num:1},
-          {id:3,name:'3M 水胶体敷料  90022T',price:1049,unit:'片',num:1},
-          {id:4,name:'3M 水胶体敷料  90022T',price:1049,unit:'片',num:1}
-        ],
+        list:[],
         checkList:[],
         alertShow: false,
         userinfo:this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):[],
+        loading:false,
+        activeID:''
       }
     },
+    mounted() {
+      this.getList()
+    },
     methods:{
-      search:function(value){
-        this.$router.push({name:'search',params:{value:value}})
+      getList:function(){
+        if(this.userinfo!=[]){
+          this.loading = true
+          this.axios.get('/api/cart?api_token='+this.userinfo['api_token']+'&hid='+this.$cookies.get('hid')).then(res=>{
+            console.log(res)
+            if(res.data.status==200){
+              this.list = res.data.data.cart
+              this.loading = false
+            }else{
+              that.$message.error(res.data.msg)
+            }
+          });
+        }
       },
-      handleChange:function(e){
-        this.totalFn()
+      search:function(value){
+        this.$router.push({path:'/search',query:{value:value}})
+      },
+      handleChange:function(id,num){
+        var data = {
+          id: id,
+          num: num
+        }
+        this.axios.post('/api/changenum?api_token='+this.userinfo['api_token'],data).then(res=>{
+          console.log(res)
+          if(res.status==200){
+            this.getList()
+          }else{
+            that.$message.error(res.data.msg)
+          }
+        });
       },
       alertShowFn:function(){
         this.alertShow = true
       },
       checkOne:function(id){
+        console.log(id)
         var that = this
         if(that.checkList.indexOf(id)==-1){
           that.checkList.push(id)
@@ -132,39 +164,77 @@
       alertHideFn:function(){
         this.alertShow = false
       },
-      submit:function(){
-        this.alertShow = false
-        this.$router.push({name:'placeOrder'})
+      buy:function(){
+        if(this.checkList.length!=0){
+          this.alertShowFn()
+        }else{
+          this.$message({
+            type:'warning',
+            message:'请选择您想购买的商品'
+          })
+        }
       },
-      del:function(id){
+      submit:function(){
+
         var that = this
-        that.$confirm('此操作将删除该商品, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          that.list.splice(that.list.indexOf(id),1)
-          that.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-        }).catch(() => {
-          that.$message({
-            type: 'info',
-            message: '已取消删除'
-          });
+        var url = '/api/addorder?api_token='+this.userinfo['api_token']
+        //
+        var data = []
+        that.list.forEach((item,index)=>{
+          that.checkList.forEach((item_,index_)=>{
+            if(item_ == item.id){
+              data.push({
+                id: item.id,
+                price: item.price,
+                num: item.num
+              })
+            }
+          })
+        })
+        console.log(data)
+        //
+        that.axios.post(url,{data:JSON.stringify(data)}).then(res=>{
+          console.log(res)
+          if(res.status==200){
+            that.$message({
+              type: 'success',
+              message: '下单成功!'
+            });
+            this.alertShow = false
+            this.$router.push({path:'/placeOrder',query:{id:res.data.data.orderinfo.id}})
+          }else{
+            that.$message.error(res.data.msg)
+          }
         });
+        console.log(data)
       },
       delAll:function(){
+        this.delFn(this.checkList.join(','))
+      },
+      delFn:function(ids){
+        //
         var that = this
+        var url = '/api/delcart?api_token='+this.userinfo['api_token']
+        var data = {
+          id: ids
+        }
+        //
         that.$confirm('此操作将删除商品, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          that.$message({
-            type: 'success',
-            message: '删除成功!'
+          that.axios.post(url,data).then(res=>{
+            console.log(res)
+            if(res.status==200){
+              that.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              that.getList()
+            }else{
+              that.$message.error(res.data.msg)
+            }
           });
         }).catch(() => {
           that.$message({
@@ -175,11 +245,6 @@
       },
       go:function(url){
         this.$router.push({path:'/'+url})
-      },
-      myCart:function(){
-        this.axios.get('/api/cart?api_token='+this.userinfo['api_token']).then(res=>{
-          this.list = res.data.data.cart
-        });
       }
     }
   }

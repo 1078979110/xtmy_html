@@ -1,6 +1,6 @@
 <template>
   <div id="login">
-    <top @go="go" v-bind="userinfo"></top>
+    <top @go="go" v-bind="userinfo" ref="top"></top>
     <div class="tab">
       <tab type='2' @search="search"></tab>
     </div>
@@ -56,24 +56,43 @@
     computed:{
       passwordCheckValidate: function(){
         if(this.comfirmpassword !== this.newpassword){
-          alert('确认密码和新密码不一致！');
+          this.$message({
+            message:'确认密码和新密码不一致!',
+            type: 'warning'
+          })
           return false;
         }
       }
     },
     methods:{
       search:function(value){
-        this.$router.push({name:'search',params:{value:value}})
+        this.$router.push({path:'/search',query:{value:value}})
       },
       go:function(url){
-        this.$router.push({path:'/'+url})
+        if(url != 'password'){
+          this.$router.push({path:'/'+url})
+        }else{
+          this.$refs.top.showFn();
+        }
       },
       changepwd: function(){
         this.passwordCheckValidate;
         this.axios.post('/api/changepwd?api_token='+this.userinfo['api_token'],{password:this.password,newpassword:this.newpassword}).then(res=>{
-          alert(res.data.msg);
+
           if(res.data.status ==200){
-            this.$cookies.set('userinfo', res.data.data.user);
+            this.$message({
+              type: 'success',
+              message: res.data.msg
+            })
+            this.$cookies.remove('mycar');
+            this.$cookies.remove('hid');
+            this.$cookies.remove('hospital');
+            this.$cookies.remove('api_token');
+            this.$cookies.remove('userinfo');
+            this.$cookies.remove('type');
+            this.$router.push({path:'/login'});
+          }else{
+
           }
         });
       }

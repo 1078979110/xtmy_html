@@ -1,7 +1,7 @@
 <template>
   <div id="tab">
       <div class="content d-flex d-flex-middle d-flex-between">
-          <img src="../../static/logo.png" class="logo"/>
+          <img src="../../static/logo.png" class="logo click" @click="home"/>
           <div class="searchView d-flex d-flex-middle d-flex-between" v-if="type!=1">
             <input type="text" v-model="searchValue"/>
             <p class="btn click" @click="search">搜索</p>
@@ -23,6 +23,9 @@ export default {
     type: {
       default: 0
     },
+    value_search: {
+      default:''
+    }
   },
   data () {
     return{
@@ -32,6 +35,7 @@ export default {
     }
   },
   mounted() {
+    this.searchValue = this.value_search
     this.getCart()
   },
   methods:{
@@ -47,15 +51,22 @@ export default {
       }
     },
     goShopCart:function(){
-      this.$emit('shopCart')
+      if(this.api_token!=''){
+        this.$emit('shopCart')
+      }else{
+        this.$message.error('请先登录！')
+      }
     },
-    getCart(){
+    getCart:function(){
       if(this.api_token !=''){
-        this.axios.get('/api/cart?api_token='+this.api_token).then(res=>{
+        this.axios.get('/api/cart?api_token='+this.api_token+'&hid='+this.$cookies.get('hid')).then(res=>{
           this.$cookies.set('mycar',res.data.data.cart);
           this.cartnum = res.data.data.cart.length;
         });
       }
+    },
+    home(){
+      this.$router.push({path:'/'});
     }
   }
 }

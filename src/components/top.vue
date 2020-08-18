@@ -1,5 +1,5 @@
 <template>
-  <div id="topbar">
+  <div class="topbar">
     <div class="content d-flex d-flex-middle d-flex-between">
       <p class="title">您好，欢迎进入协同贸易网</p>
       <div class="right d-flex d-flex-middle d-flex-end">
@@ -7,9 +7,9 @@
         <p class="color click ml0" v-else @click="showFn">{{telephone}}</p>
         <p class="color click" @click="go('order')">我的订单</p>
         <p class="color click" @click="selecth" v-if="type!=1 && hid==0">选择医院</p>
-        <p class="color click" @click="selecth" v-else>{{hospital}}</p>
-        <div class="info" v-if="api_token && showHl">
-          <p @click="changeh(i)"  v-for="(item ,i) in hospitallist">{{item}}</p>
+        <p class="color click" @click="selecth" v-if="type!=1 && hid!=0">{{hospital}}</p>
+        <div class="hospital" v-if="api_token && showHl" v-loading="loading">
+          <p @click="changeh(i)" v-for="(item ,i) in hospitallist" :title="item">{{item}}</p>
         </div>
         <div class="info" v-if="api_token && show">
           <p @click="go('password')">修改密码</p>
@@ -26,18 +26,13 @@
     props:['api_token', 'telephone','type'],
     data(){
       return{
-        hospitallist:[0,0,0],
+        hospitallist:[],
         hid:this.$cookies.get('hid')?this.$cookies.get('hid'):0,
         hospital:this.$cookies.get('hospital')?this.$cookies.get('hospital'):'',
         show: false,
-        showHl:false
-      }
-    },
-    mounted(){
-      var route_ = ['order','shopCart','password','placeOrder'];
-      if((route_.indexOf(this.$route.name)>=0)&&( !this.$cookies.isKey('api_token'))){
-        this.$router.push({'name':'login'});
-        alert('还未登陆，请先登录！');
+        showHl:false,
+        api_token_: this.$cookies.get('api_token')?this.$cookies.get('api_token'):'',
+        loading: null
       }
     },
     methods:{
@@ -49,15 +44,25 @@
         this.showHl = false;
       },
       selecth:function(){
+        if(this.api_token_!=''){
           this.showHl = !this.showHl;
           this.show = false;
+          this.loading = true
           this.axios.get('/api/hospital?api_token='+ this.api_token).then(res=>{
-            if(res.data.status == 200)
-            this.hospitallist = res.data.data.hospital
-            else{
-              alert(res.data.msg)
+            if(res.data.status == 200){
+              this.hospitallist = res.data.data.hospital
+              this.loading = false
+            }else{
+              this.$message.error(res.data.msg);
             }
           });
+        }else{
+          this.$message({
+            message: '请先登录',
+            type: 'warning'
+          });
+        }
+
       },
       changeh:function(id){
         this.axios.post('/api/selecthospital?api_token='+this.api_token,{hid:id}).then(res=>{
@@ -65,15 +70,20 @@
             this.hid = id;
             this.$cookies.set('hid',id);
             this.$cookies.set('hospital',this.hospitallist[id]);
-            this.hospital = this.hospitallist[id]
             this.showHl = !this.showHl
-            alert(res.data.msg)
+            this.$message({
+              message: res.data.msg,
+              type: 'success'
+            });
+            this.$router.go(0)
+          }else{
+            this.$message.error(res.data.msg);
           }
         });
       },
       logout:function(){
         this.axios.get('/api/logout?api_token='+this.api_token).then(res=>{
-          alert(res.data.msg);
+          this.$message(res.data.msg);
           this.$cookies.remove('mycar');
           this.$cookies.remove('hid');
           this.$cookies.remove('hospital');
@@ -83,21 +93,18 @@
           this.$router.push({path:'/login'});
         });
       }
-    },
-    checkLogin:function(){
-      
     }
   }
 </script>
 
 <style scoped>
-#topbar{
+.topbar{
   background-color: #EEEEEE;
   height: 34px;
   width: 100%;
   line-height: 34px;
 }
-#topbar p{
+.topbar p{
   font-size: 12px;
 }
 .title{
@@ -121,7 +128,7 @@
   padding: 10px;
   z-index: 999;
 }
-.info p{
+.info p,.hospital p{
   margin-top: 20rpx;
   font-size:12px;
   font-weight:500;
@@ -130,6 +137,24 @@
   text-align: center;
   line-height: 30px;
   cursor: pointer;
+}
+.hospital{
+  position: absolute;
+  top: 34px;
+  right: 0;
+  width:120px;
+  background:rgba(255,255,255,1);
+  box-shadow:0px 3px 7px 0px rgba(0, 0, 0, 0.14);
+  box-sizing: border-box;
+  padding: 10px;
+  z-index: 999;
+}
+.hospital p{
+  height: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
 }
 .ml0{
   margin-left: 0 !important;

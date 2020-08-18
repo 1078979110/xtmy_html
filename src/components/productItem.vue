@@ -4,11 +4,11 @@
       <p class="name">{{item.medicinal}}</p>
       <p class="name">{{item.specification}}</p>
       <div class="d-flex d-flex-middle">
-        <p class="price" v-show="type !=1"><small>￥</small>{{item.price}}</p>
-        <p class="stock">{{item.stocks}}</p>
+        <p class="price" v-show="type ==2"><small>￥</small>{{item.price}}/{{item.unit}}</p>
+        <p class="stock">库存{{item.stocks}}</p>
       </div>
     </div>
-    <img src="../../static/shopcart2.png" class="addShopcart click" @click="submit(item.id)"/>
+    <img src="../../static/shopcart2.png" class="addShopcart click" @click="submit()"/>
   </div>
 </template>
 
@@ -19,11 +19,21 @@
     data(){
       return{
         type:this.$cookies.get('type'),
+        api_token: this.$cookies.get('api_token')?this.$cookies.get('api_token'):''
       }
     },
     methods:{
-      submit:function(id){
-        this.$emit('add(id)')
+      submit:function(){
+        if(this.api_token!=''){
+          var data = {
+            id: this.item.id,
+            stocks: this.item.stock,
+          }
+          this.$emit('add',data)
+        }else{
+          this.$message('请先登录！')
+        }
+
       },
     }
   }

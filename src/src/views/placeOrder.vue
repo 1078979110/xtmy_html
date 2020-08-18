@@ -1,8 +1,8 @@
 <template>
   <div id="placeOrder">
-    <top @go="go"></top>
+    <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
-      <tab type="2"></tab>
+      <tab type="2" :value_search='value' @search="search"></tab>
     </div>
     <!--  -->
     <div class="content centerView bgF">
@@ -15,19 +15,19 @@
         <div class="d-flex d-flex-middle d-flex-wrap d-flex-between">
           <div class="viewLi d-flex d-flex-middle">
             <p>订单编号：</p>
-            <p class="color">545155222</p>
+            <p class="color click" @click="go('order')">{{info.orderid}}</p>
           </div>
           <div class="viewLi d-flex d-flex-middle">
             <p>数量：</p>
-            <p>1片</p>
+            <p>{{info.totalnum}}片</p>
           </div>
           <div class="viewLi d-flex d-flex-middle">
             <p>价格：</p>
-            <p>￥1049</p>
+            <p>￥{{info.totalprice}}</p>
           </div>
           <div class="viewLi d-flex d-flex-middle">
             <p>下单时间：</p>
-            <p>2020-07-13  16:14:32</p>
+            <p>{{info.created_at}}</p>
           </div>
         </div>
       </div>
@@ -45,18 +45,40 @@
     },
     data(){
       return{
-        value:''
+        value:'',
+        info:'',
+        id:'',
+        userinfo: this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):[],
+        api_token: this.$cookies.get('api_token')?this.$cookies.get('api_token'):'',
       }
     },
     mounted() {
-
+      this.id = this.$route.query.id
+      this.getInfo()
     },
     methods:{
       search:function(value){
-        this.$router.push({path:'/shopCart',params:{value:value}})
+        this.$router.push({path:'/search',query:{value:value}})
       },
       go:function(url){
         this.$router.push({path:'/'+url})
+      },
+      getInfo:function(){
+        if(this.api_token!=''){
+          var url = '/api/orderinfo?api_token='+this.api_token+'&oid='+this.id
+          this.axios.get(url).then(res=>{
+            if(res.data.status==200){
+              var info = res.data.data.info
+              this.info = JSON.parse(info)
+              // console.log(JSON.parse(this.info.orderinfo))
+              console.log(this.info)
+            }else{
+              this.$message.error(res.data.msg)
+            }
+            console.log(res)
+          });
+        }
+
       }
     }
   }

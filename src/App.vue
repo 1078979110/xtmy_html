@@ -94,7 +94,7 @@ input,textarea{
   overflow: hidden;
 }
 .content{
-  max-width: 1200px;
+  width: 1200px;
   margin: 0 auto;
 }
 .click,.submit{
@@ -106,4 +106,17 @@ input,textarea{
 .el-select input{
   border: none !important;
 }
+.none{
+    text-align: center;
+    padding-bottom: 220px;
+    margin-top: 120px;
+    img{
+      width: 330px;
+      height: 300px;
+    }
+    p{
+      font-size:18px;
+      color: #999;
+    }
+  }
 </style>

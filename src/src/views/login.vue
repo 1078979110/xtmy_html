@@ -20,7 +20,7 @@
         <div class="viewLi">
           <div class="title d-flex d-flex-middle d-flex-between">
             <p class="titleL">密码</p>
-            <p class="titleR click" @click="go('password')">忘记密码</p>
+            <p class="titleR click" @click="toast">忘记密码</p>
           </div>
           <input type="password" name="password" v-model="password" />
         </div>
@@ -51,17 +51,23 @@
       this.chechAuth();
     },
     methods:{
+      toast:function(){
+        this.$message({
+          message: '请联系平台客服',
+          type: 'warning'
+        });
+      },
       chechAuth:function(){
         if(this.userinfo){
-          alert('已经登陆，请不要重复登陆');
-          this.$router.push({path:'/home'});
+          this.$message.error('已经登陆，请不要重复登陆');
+          this.$router.push({path:'/'});
         }
       },
       search:function(value){
-        this.$router.push({name:'search',params:{value:value}})
+        this.$router.push({path:'/search',query:{value:value}})
       },
       go:function(url){
-        if(url!='order'){
+        if(url!='login'){
           this.$router.push({path:'/'+url})
         }
       },
@@ -69,6 +75,14 @@
         this.$router.push({path:'/shopCart'})
       },
       auth:function(){
+        if(this.telephone.trim() == ''){
+          this.$message.error('请输入手机号！')
+          return
+        }
+        if(this.password.trim() == ''){
+          this.$message.error('请输入密码！')
+          return
+        }
         this.axios.post('/api/login',{telephone:this.telephone, password:this.password}).then(res=>{
           if(res.data.status == 200){
             this.$cookies.set('api_token',res.data.data.user.api_token);
@@ -78,8 +92,11 @@
             this.userinfo = this.$cookies.get('userinfo');
             this.api_token = this.$cookies.get('api_token');
             if(this.type == 2){
-              alert('请在右上角进行选择医院');
+              // this.$message('请在右上角进行选择医院');
             }
+            this.$router.push({path:'/'})
+          }else{
+            this.$message.error(res.data.msg)
           }
         });
       }

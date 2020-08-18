@@ -3,7 +3,7 @@
     <p class="bg" @click="hide"></p>
     <div class="aContent">
       <p class="aTitle">选择商品规格</p>
-      <div class="priceView d-flex d-flex-middle d-flex-between">
+      <div class="priceView d-flex d-flex-middle d-flex-between" v-if="type==1">
         <p class="typeTitle">输入单价</p>
         <input type="number" v-model="price" placeholder="0.00"/>
       </div>
@@ -21,11 +21,11 @@
         </div>
       </div>
       <div class="num d-flex d-flex-middle d-flex-between">
-        <p class="typeTitle">选择型号</p>
+        <p class="typeTitle">选择数量</p>
         <div class="d-flex d-flex-middle d-flex-center">
-          <p class="click cut"></p>
+          <p class="click cut" @click="cut"></p>
           <p class="color numInput">{{num}}</p>
-          <p class="click add"></p>
+          <p class="click add" @click="add"></p>
         </div>
       </div>
       <p class="submit color click" @click="submit">加入购物车</p>
@@ -35,27 +35,32 @@
 
 <script>
   export default{
+    props:{
+      info:{
+        default:''
+      }
+    },
     data(){
       return{
-        options: [{
-          value: '选项1',
-          label: '黄金糕'
-        }, {
-          value: '选项2',
-          label: '双皮奶'
-        }, {
-          value: '选项3',
-          label: '蚵仔煎'
-        }, {
-          value: '选项4',
-          label: '龙须面'
-        }, {
-          value: '选项5',
-          label: '北京烤鸭'
-        }],
+        options: [],
         value: '',
         num:1,
-        price:''
+        price:'',
+        api_token: this.$cookies.get('api_token')?this.$cookies.get('api_token'):'',
+        type:this.$cookies.get('type'),
+      }
+    },
+    mounted() {
+      if(this.api_token!=''){
+        this.axios.get('/api/specification?api_token='+this.api_token+'&mid='+this.info.id).then(res=>{
+          console.log(res)
+          this.options = []
+          this.options.push({
+            value: res.data.data.specification,
+            label: res.data.data.specification
+          })
+          this.value = res.data.data.specification
+        });
       }
     },
     methods:{
@@ -63,7 +68,55 @@
         this.$emit('hideFn')
       },
       submit:function(){
-        this.$emit('addFn')
+        var data = {
+          mid:this.info.id,
+          num: this.num,
+          specification: this.value,
+
+        }
+        if(this.type == 1){
+          if(this.price.trim()==''){
+            this.$message.error('请填写价格！')
+            return
+          }
+          data.price = this.price
+        }else{
+          data.hid = this.$cookies.get('hid')
+        }
+        this.axios.post('/api/addcart?api_token='+this.api_token,data).then(res=>{
+          console.log(res)
+          if(res.status ==200){
+            this.$emit('addFn')
+            this.$message({
+              type:'success',
+              message:'成功加入购物车'
+            })
+          }else{
+            this.$message(res.data.msg)
+          }
+        });
+      },
+      cut:function(){
+        var num = this.num*1
+        if(num > 1){
+          this.num = num - 1
+        }else{
+          this.$message({
+            message:'最低数量为1',
+            type:'warning'
+          })
+        }
+      },
+      add:function(){
+        var num = this.num*1
+        if(num < this.info.stocks){
+          this.num = num + 1
+        }else{
+          this.$message({
+            message:'不可超过库存',
+            type:'warning'
+          })
+        }
       }
     }
   }

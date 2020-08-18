@@ -1,16 +1,13 @@
 <template>
-  <div id="home">
+  <div id="home" v-loading="loading">
     <top @go="go" v-bind="userinfo"></top>
     <div class="tab">
       <tab type="1" @shopCart="shopCart"></tab>
     </div>
     <div class="banner content">
       <el-carousel class="bannerView">
-        <el-carousel-item>
-          <img src="../../../static/banner.png" />
-        </el-carousel-item>
-        <el-carousel-item>
-          <img src="../../../static/banner.png" />
+        <el-carousel-item v-for="(item,indexB) in banners" :key="indexB">
+          <img :src="item" />
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -24,7 +21,7 @@
     <div class="products">
       <div class="content d-flex d-flex-middle d-flex-between">
         <div class="productItem click" v-for="(item,index) in list" :key="index" @click="classify(index)">
-          <img src="../../../static/banner.png" />
+          <img :src="item.image" />
           <div class="productInfo" >
             <p>{{item.name}}</p>
             <p>{{item.line}}</p>
@@ -51,9 +48,13 @@
         pid:'',
         lid:'',
         cid:'',
+        loading:null,
+        info:'',
+        banners:[]
       }
     },
     mounted(){
+      this.getSite();
       this.pfilter();
     },
     methods:{
@@ -63,11 +64,14 @@
         console.log(this.pid);
         console.log(this.lid);
         console.log(index);
-        this.$router.push({path:'/classify',params:{'hid':this.pid,'lid':this.lid}});
+        this.$router.push({path:'/classify',query:{'pid':this.pid,'lid':this.lid}});
       },
       pfilter:function(){
+        this.loading = true
         this.axios.get('/api/homefilter').then(res=>{
+          console.log(res)
           this.list = res.data.data.filter
+          this.loading = false
         });
       },
       search:function(){
@@ -78,7 +82,7 @@
             message: '搜索内容可不为空'
           });
         }else{
-          that.$router.push({name:'search',params:{value:that.searchVal.trim()}})
+          this.$router.push({path:'/search',query:{value:that.searchVal.trim()}})
         }
       },
       shopCart:function(data){
@@ -86,6 +90,12 @@
       },
       go:function(url){
         this.$router.push({path:'/'+url})
+      },
+      getSite: function(){
+        this.axios.get('/api/siteinfo').then(res=>{
+          console.log(res)
+          this.banners = res.data.data.site.banners
+        });
       }
     }
   }
