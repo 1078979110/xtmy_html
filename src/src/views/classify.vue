@@ -56,7 +56,7 @@
         pid:'',
         lid:'',
         cid:'',
-        userinfo:this.$cookies.get('userinfo'),
+        userinfo:this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):'',
         list:[],
         tabs:[
           {
@@ -120,28 +120,26 @@
       },
       getList:function(){
         var url = '/api/index';
-        if(this.api_token!=''){
-          if(this.$cookies.get('userinfo').type == 2){
-            if(this.$cookies.get('hid')){
-              url = url+'?api_token='+this.api_token+'&pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid+'&hid='+this.$cookies.get('hid')+'&page='+this.page;
-            }else{
-              this.$message({
-                type:'warning',
-                message:'请在右上角进行选择医院'
-              });
-              return
-            }
+        if(this.userinfo != '' && this.$cookies.get('userinfo').type == 2){
+          if(this.$cookies.get('hid')){
+            url = url+'?api_token='+this.api_token+'&pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid+'&hid='+this.$cookies.get('hid')+'&page='+this.page;
           }else{
-            url = url+'?api_token='+this.api_token+'&pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid+'&page='+this.page;
+            this.$message({
+              type:'warning',
+              message:'请在右上角进行选择医院'
+            });
+            return
           }
-          this.loading = true
-          this.axios.get(url).then(res=>{
-            this.list = res.data.data.list.data
-            this.total = res.data.data.list.total
-            this.loading = false
-            console.log(res)
-          });
+        }else{
+          url = url+'?api_token='+this.api_token+'&pid='+this.pid+'&lid='+this.lid+'&cid='+this.cid+'&page='+this.page;
         }
+        this.loading = true
+        this.axios.get(url).then(res=>{
+          this.list = res.data.data.list.data
+          this.total = res.data.data.list.total
+          this.loading = false
+          console.log(res)
+        });
       },
       search:function(value){
         this.$router.push({path:'/search',query:{value:value}})

@@ -50,7 +50,7 @@
         value:null,
         list:[],
         alert:false,
-        userinfo:this.$cookies.get('userinfo'),
+        userinfo:this.$cookies.get('userinfo')?this.$cookies.get('userinfo'):'',
         type: this.$cookies.get('type'),
         loading: null,
         api_token: this.$cookies.get('api_token')?this.$cookies.get('api_token'):'',
@@ -78,28 +78,26 @@
       },
       getList:function(){
         
-        if(this.api_token!=''){
-          if(this.$cookies.get('userinfo').type == 2){
-            if(this.$cookies.get('hid')){
-              var url = '/api/index?api_token='+this.api_token+'&q='+this.value +'&hid='+this.$cookies.get('hid')+'&page='+this.page;
-            }else{
-              this.$message({
-                type:'warning',
-                message:'请在右上角进行选择医院'
-              });
-              return
-            }
+        if(this.userinfo!= '' && this.$cookies.get('userinfo').type == 2){
+          if(this.$cookies.get('hid')){
+            var url = '/api/index?api_token='+this.api_token+'&q='+this.value +'&hid='+this.$cookies.get('hid')+'&page='+this.page;
           }else{
-            var url = '/api/index?api_token='+this.api_token+'&q='+this.value+'&page='+this.page;
+            this.$message({
+              type:'warning',
+              message:'请在右上角进行选择医院'
+            });
+            return
           }
-          this.loading = true
-          this.axios.get(url).then(res=>{
-            this.list = res.data.data.list.data
-            this.total = res.data.data.list.total
-            this.loading = false
-            console.log(res)
-          });
+        }else{
+          var url = '/api/index?api_token='+this.api_token+'&q='+this.value+'&page='+this.page;
         }
+        this.loading = true
+        this.axios.get(url).then(res=>{
+          this.list = res.data.data.list.data
+          this.total = res.data.data.list.total
+          this.loading = false
+          console.log(res)
+        });
 
       },
       shopCart:function(data){
